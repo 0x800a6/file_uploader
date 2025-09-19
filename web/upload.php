@@ -22,7 +22,7 @@ if (file_exists(__DIR__ . '/config.php')) {
 }
 
 
-$requiredKey = $config['SEC_KEY'] ?? null;$requiredKey = $config['SEC_KEY'] ?? null;
+$requiredKey = $config['SEC_KEY'] ?? null;
 $providedKey = $_GET['key'] ?? '';
 
 if (empty($requiredKey)) {
@@ -76,13 +76,49 @@ if (!isset($_FILES['file'])) {
 }
 
 $file = $_FILES['file'];
-$destination = $targetDir . '/' . basename($file['name']);
+$originalFilename = basename($file['name']);
+$destination = $targetDir . '/' . $originalFilename;
+
+// Check if file already exists
+if (file_exists($destination)) {
+    // Calculate hash of uploaded file
+    $uploadedFileHash = hash_file('sha256', $file['tmp_name']);
+    
+    // Calculate hash of existing file
+    $existingFileHash = hash_file('sha256', $destination);
+    
+    // If hashes are the same, fail the upload
+    if ($uploadedFileHash === $existingFileHash) {
+        http_response_code(409); // Conflict status code
+        $response['message'] = 'File already exists with identical content.';
+        echo json_encode($response);
+        exit;
+    }
+    
+    // If hashes differ, generate a GUID and append to filename
+    $pathInfo = pathinfo($originalFilename);
+    $guid = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+        mt_rand(0, 0xffff), mt_rand(0, 0xffff),
+        mt_rand(0, 0xffff),
+        mt_rand(0, 0x0fff) | 0x4000,
+        mt_rand(0, 0x3fff) | 0x8000,
+        mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
+    );
+    
+    $newFilename = $pathInfo['filename'] . '_' . $guid;
+    if (isset($pathInfo['extension'])) {
+        $newFilename .= '.' . $pathInfo['extension'];
+    }
+    
+    $destination = $targetDir . '/' . $newFilename;
+}
 
 if (move_uploaded_file($file['tmp_name'], $destination)) {
     $response['success'] = true;
     $response['message'] = 'File uploaded successfully.';
     $response['file'] = [
-        'name' => $file['name'],
+        'name' => basename($destination), // Use actual filename (may include GUID)
+        'original_name' => $file['name'], // Include original filename for reference
         'size' => $file['size'],
         'path' => str_replace(__DIR__, '', $destination)
     ];
