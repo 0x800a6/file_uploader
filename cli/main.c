@@ -66,6 +66,53 @@ struct response_data {
     size_t size;
 };
 
+/**
+ * Simple JSON message parser - extracts value of "message" field
+ * Returns allocated string that must be freed, or NULL if not found
+ */
+char* extract_json_message(const char* json_str) {
+    if (!json_str) return NULL;
+    
+    // Look for "message" field
+    const char* message_start = strstr(json_str, "\"message\"");
+    if (!message_start) return NULL;
+    
+    // Find the colon after "message"
+    const char* colon = strchr(message_start, ':');
+    if (!colon) return NULL;
+    
+    // Skip whitespace and find opening quote
+    const char* quote_start = colon + 1;
+    while (*quote_start && (*quote_start == ' ' || *quote_start == '\t')) {
+        quote_start++;
+    }
+    
+    if (*quote_start != '"') return NULL;
+    quote_start++; // Skip opening quote
+    
+    // Find closing quote
+    const char* quote_end = quote_start;
+    while (*quote_end && *quote_end != '"') {
+        if (*quote_end == '\\' && *(quote_end + 1)) {
+            quote_end += 2; // Skip escaped character
+        } else {
+            quote_end++;
+        }
+    }
+    
+    if (*quote_end != '"') return NULL;
+    
+    // Allocate and copy message
+    size_t msg_len = quote_end - quote_start;
+    char* message = malloc(msg_len + 1);
+    if (!message) return NULL;
+    
+    strncpy(message, quote_start, msg_len);
+    message[msg_len] = '\0';
+    
+    return message;
+}
+
 // Callback function to capture response
 static size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb, struct response_data *userp) {
     size_t realsize = size * nmemb;
@@ -370,9 +417,21 @@ int upload_file_optimized(const char *file_path, const char *subdir, CURL *curl)
         g_files_failed++;
         pthread_mutex_unlock(&g_stats_mutex);
     } else if (response_code != 200) {
-        fprintf(stderr, "Server error for %s: HTTP %ld\n", file_path, response_code);
+        // Try to extract error message from JSON response
+        char* error_message = NULL;
+        if (response.memory) {
+            error_message = extract_json_message(response.memory);
+        }
+        
+        if (error_message) {
+            fprintf(stderr, "Upload failed for %s: %s\n", file_path, error_message);
+            free(error_message);
+        } else {
+            fprintf(stderr, "Server error for %s: HTTP %ld\n", file_path, response_code);
+        }
+        
         if (response.memory && g_verbose) {
-            fprintf(stderr, "Response: %s\n", response.memory);
+            fprintf(stderr, "Full response: %s\n", response.memory);
         }
         pthread_mutex_lock(&g_stats_mutex);
         g_files_failed++;
