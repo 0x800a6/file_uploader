@@ -1,7 +1,7 @@
 # File Uploader Makefile
 CC = gcc
 CFLAGS = -Wall -Wextra -std=c99 -O2
-LDFLAGS = -lcurl
+LDFLAGS = -lcurl -lpthread
 TARGET = /tmp/file_uploader
 SOURCE = main.c
 
