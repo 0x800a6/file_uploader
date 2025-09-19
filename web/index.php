@@ -158,6 +158,7 @@ $description = empty($currentPath)
             <th scope="col">Type</th>
             <th scope="col">Size</th>
             <th scope="col">Last Modified</th>
+            <th scope="col">SHA-256</th>
         </tr>
         </thead>
         <tbody>
@@ -175,7 +176,7 @@ foreach ($files as $file) {
         // Generate clean URL for directories
         $relativePath = trim(str_replace($baseDir, '', $filePath), '/');
         $urlPath = '/' . $relativePath;
-        echo "<tr class='dir'><td><a href='" . htmlspecialchars($urlPath) . "' aria-label='Browse directory: $file'>[DIR] " . htmlspecialchars($file) . "</a></td><td>$type</td><td>$size</td><td>$modified</td></tr>";
+        echo "<tr class='dir'><td><a href='" . htmlspecialchars($urlPath) . "' aria-label='Browse directory: $file'>[DIR] " . htmlspecialchars($file) . "</a></td><td>$type</td><td>$size</td><td>$modified</td><td>—</td></tr>";
     } else {
         $fileExt = strtolower($type);
         $icon = match($fileExt) {
@@ -190,10 +191,14 @@ foreach ($files as $file) {
             'doc', 'docx' => '[DOC]',
             default => '[FILE]'
         };
+        // Calculate SHA-256 hash for files
+        $sha256 = hash_file('sha256', $filePath);
+        $shortSha = substr($sha256, 0, 16) . '...'; // Display first 16 chars with ellipsis
+        
         // Generate clean URL for files
         $relativePath = trim(str_replace($baseDir, '', $filePath), '/');
         $fileUrl = '/' . $relativePath;
-        echo "<tr class='file'><td><a href='" . htmlspecialchars($fileUrl) . "' aria-label='Download or view file: $file'>$icon " . htmlspecialchars($file) . "</a></td><td>$type</td><td>$size</td><td>$modified</td></tr>";
+        echo "<tr class='file'><td><a href='" . htmlspecialchars($fileUrl) . "' aria-label='Download or view file: $file'>$icon " . htmlspecialchars($file) . "</a></td><td>$type</td><td>$size</td><td>$modified</td><td title='" . htmlspecialchars($sha256) . "' class='sha-hash'>" . htmlspecialchars($shortSha) . "</td></tr>";
     }
 }
 ?>

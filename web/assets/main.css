@@ -40,3 +40,19 @@
     .nav {
         margin-bottom: 10px;
     }
+    .sha-hash {
+        font-family: monospace;
+        font-size: 0.9em;
+        cursor: help;
+        color: #666;
+    }
+    
+    /* Responsive design for smaller screens */
+    @media screen and (max-width: 768px) {
+        .sha-hash {
+            display: none;
+        }
+        th:last-child {
+            display: none;
+        }
+    }
