@@ -1,4 +1,15 @@
 RewriteEngine On
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^ index.php [L]
+
+# Don't rewrite if it's an existing file or directory
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Don't rewrite download.php requests
+RewriteRule ^download\.php - [L]
+
+# Don't rewrite asset files
+RewriteRule ^assets/ - [L]
+
+# Rewrite everything else to index.php
+RewriteRule ^(.*)$ index.php [L,QSA]

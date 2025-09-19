@@ -1,11 +1,88 @@
 <?php
 $baseDir = __DIR__ . '/files';
 
+// Get the requested path from URL
+$requestPath = $_SERVER['REQUEST_URI'];
+$requestPath = parse_url($requestPath, PHP_URL_PATH);
+$requestPath = trim($requestPath, '/');
+
+// If there's still a 'dir' query parameter, use it (for backwards compatibility)
+if (isset($_GET['dir'])) {
+    $requestedDir = $_GET['dir'];
+} else {
+    $requestedDir = $requestPath;
+}
+
 // Security: prevent path traversal
-$path = realpath($baseDir . '/' . ($_GET['dir'] ?? ''));
+$path = realpath($baseDir . '/' . $requestedDir);
 if ($path === false || !str_starts_with($path, $baseDir)) {
     $path = $baseDir;
 }
+
+// Helper function to detect browser requests
+function isBrowserRequest() {
+    $accept = $_SERVER['HTTP_ACCEPT'] ?? '';
+    $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+    return stripos($accept, 'text/html') !== false || stripos($userAgent, 'Mozilla') !== false;
+}
+
+// If the requested path is a file, serve it directly
+if (is_file($path)) {
+    $mimeType = mime_content_type($path);
+    $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+
+    if (isBrowserRequest()) {
+        if (str_starts_with($mimeType, 'image/')) {
+            header('Content-Type: ' . $mimeType);
+            header('Content-Disposition: inline; filename="' . basename($path) . '"');
+            readfile($path);
+        } elseif (str_starts_with($mimeType, 'video/')) {
+            header('Content-Type: ' . $mimeType);
+            header('Content-Disposition: inline; filename="' . basename($path) . '"');
+            readfile($path);
+        } elseif (str_starts_with($mimeType, 'audio/')) {
+            header('Content-Type: ' . $mimeType);
+            header('Content-Disposition: inline; filename="' . basename($path) . '"');
+            readfile($path);
+        } elseif ($mimeType === 'application/pdf') {
+            header('Content-Type: ' . $mimeType);
+            header('Content-Disposition: inline; filename="' . basename($path) . '"');
+            readfile($path);
+        } elseif ($mimeType === 'image/svg+xml') {
+            header('Content-Type: ' . $mimeType);
+            header('Content-Disposition: inline; filename="' . basename($path) . '"');
+            readfile($path);
+        } elseif (in_array($ext, ['json', 'xml', 'js', 'css', 'csv', 'md', 'yml', 'yaml', 'php', 'py', 'java', 'cpp', 'c', 'h', 'rb', 'go', 'rs', 'ts', 'jsx', 'tsx', 'vue', 'svelte', 'sql', 'sh', 'bat', 'ps1', 'dockerfile', 'gitignore', 'log', 'ini', 'conf', 'cfg', 'toml'])) {
+            header('Content-Type: text/plain; charset=utf-8');
+            header('Content-Disposition: inline; filename="' . basename($path) . '"');
+            readfile($path);
+        } elseif ($mimeType === 'text/plain' || $mimeType === 'text/html' || str_starts_with($mimeType, 'text/')) {
+            header('Content-Type: ' . $mimeType);
+            header('Content-Disposition: inline; filename="' . basename($path) . '"');
+            readfile($path);
+        } elseif ($mimeType === 'text/csv' || $mimeType === 'application/csv') {
+            header('Content-Type: text/plain; charset=utf-8');
+            header('Content-Disposition: inline; filename="' . basename($path) . '"');
+            readfile($path);
+        } else {
+            header('Content-Description: File Transfer');
+            header('Content-Type: application/octet-stream');
+            header('Content-Disposition: attachment; filename="' . basename($path) . '"');
+            header('Content-Length: ' . filesize($path));
+            readfile($path);
+        }
+    } else {
+        // Not a browser, force download
+        header('Content-Description: File Transfer');
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment; filename="' . basename($path) . '"');
+        header('Content-Length: ' . filesize($path));
+        readfile($path);
+    }
+    exit;
+}
+
+// If we reach here, it's a directory - continue with the normal directory listing
 
 $files = scandir($path);
 $parentDir = dirname(str_replace($baseDir, '', $path));
@@ -51,7 +128,7 @@ $description = empty($currentPath)
 <meta name="twitter:title" content="<?= htmlspecialchars($pageTitle) ?>">
 <meta name="twitter:description" content="<?= htmlspecialchars($description) ?>">
 
-<link rel="stylesheet" href="assets/main.css">
+<link rel="stylesheet" href="/assets/main.css">
 </head>
 <body>
 <header>
@@ -64,7 +141,11 @@ $description = empty($currentPath)
 <main>
     <nav class="breadcrumb" aria-label="Directory navigation">
         <?php if ($path !== $baseDir): ?>
-            <a href="?dir=<?= urlencode(trim($parentDir, '/')) ?>" class="nav-up" aria-label="Go to parent directory">[Up]</a>
+            <?php 
+            $parentPath = trim($parentDir, '/');
+            $parentUrl = empty($parentPath) ? '/' : '/' . $parentPath;
+            ?>
+            <a href="<?= htmlspecialchars($parentUrl) ?>" class="nav-up" aria-label="Go to parent directory">[Up]</a>
         <?php endif; ?>
     </nav>
 
@@ -84,15 +165,17 @@ $description = empty($currentPath)
 foreach ($files as $file) {
     if ($file === '.' || $file === '..') continue;
     $filePath = $path . '/' . $file;
-    $urlPath = '?dir=' . urlencode(trim(str_replace($baseDir, '', $filePath), '/'));
-
+    
     $isDir = is_dir($filePath);
     $type = $isDir ? 'DIR' : pathinfo($file, PATHINFO_EXTENSION);
     $size = $isDir ? '—' : formatSize(filesize($filePath));
     $modified = date("Y-m-d H:i:s", filemtime($filePath));
 
     if ($isDir) {
-        echo "<tr class='dir'><td><a href='$urlPath' aria-label='Browse directory: $file'>[DIR] " . htmlspecialchars($file) . "</a></td><td>$type</td><td>$size</td><td>$modified</td></tr>";
+        // Generate clean URL for directories
+        $relativePath = trim(str_replace($baseDir, '', $filePath), '/');
+        $urlPath = '/' . $relativePath;
+        echo "<tr class='dir'><td><a href='" . htmlspecialchars($urlPath) . "' aria-label='Browse directory: $file'>[DIR] " . htmlspecialchars($file) . "</a></td><td>$type</td><td>$size</td><td>$modified</td></tr>";
     } else {
         $fileExt = strtolower($type);
         $icon = match($fileExt) {
@@ -107,7 +190,10 @@ foreach ($files as $file) {
             'doc', 'docx' => '[DOC]',
             default => '[FILE]'
         };
-        echo "<tr class='file'><td><a href='download.php?file=" . urlencode($filePath) . "' aria-label='Download or view file: $file'>$icon " . htmlspecialchars($file) . "</a></td><td>$type</td><td>$size</td><td>$modified</td></tr>";
+        // Generate clean URL for files
+        $relativePath = trim(str_replace($baseDir, '', $filePath), '/');
+        $fileUrl = '/' . $relativePath;
+        echo "<tr class='file'><td><a href='" . htmlspecialchars($fileUrl) . "' aria-label='Download or view file: $file'>$icon " . htmlspecialchars($file) . "</a></td><td>$type</td><td>$size</td><td>$modified</td></tr>";
     }
 }
 ?>
