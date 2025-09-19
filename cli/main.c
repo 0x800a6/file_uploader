@@ -292,11 +292,12 @@ void print_usage(const char *program_name) {
     printf("  --version           Show version information\n\n");
     printf("Arguments:\n");
     printf("  file_or_dir         File or directory to upload\n");
-    printf("  subdir              Optional subdirectory on server (for files only)\n\n");
+    printf("  subdir              Optional subdirectory on server\n\n");
     printf("Examples:\n");
     printf("  %s file.txt\n", program_name);
     printf("  %s file.txt my_folder\n", program_name);
-    printf("  %s file.txt \"docs/mydocs\"\n", program_name);
+    printf("  %s myDir/\n", program_name);
+    printf("  %s myDir/ some/path\n", program_name);
     printf("  %s -v /path/to/directory\n", program_name);
     printf("  %s -u http://myserver.com/upload.php file.txt\n", program_name);
 }
