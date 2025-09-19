@@ -1,0 +1,42 @@
+    body {
+        background-color: #c0c0c0;
+        color: #000000;
+        font-family: "Courier New", Courier, monospace;
+        margin: 20px;
+    }
+    h1 {
+        color: #000080;
+        font-size: 22px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: #ffffff;
+        border: 2px solid #000080;
+    }
+    th, td {
+        border-bottom: 1px dotted #000080;
+        padding: 4px 8px;
+        text-align: left;
+    }
+    th {
+        background-color: #000080;
+        color: #ffffff;
+    }
+    a {
+        color: #0000ff;
+        text-decoration: none;
+    }
+    a:hover {
+        text-decoration: underline;
+        color: #ff0000;
+    }
+    .dir {
+        font-weight: bold;
+    }
+    .file {
+        font-style: italic;
+    }
+    .nav {
+        margin-bottom: 10px;
+    }
