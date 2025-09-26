@@ -209,7 +209,7 @@ foreach ($files as $file) {
 
 <footer>
     <p>
-        &copy; <?= date('Y') ?> File server by <a href="https://www.0x800a6.dev" rel="author">Lexi</a> | 
+        &copy; <?= date('Y') ?> File server by <a href="https://www.lrr.sh" rel="author">Lexi</a> | 
         <a href="https://github.com/0x800a6/file_uploader" rel="external noopener">Open Source on GitHub</a>
     </p>
     <p class="file-stats">
@@ -236,12 +236,12 @@ foreach ($files as $file) {
     "author": {
         "@type": "Person",
         "name": "Lexi",
-        "url": "https://www.0x800a6.dev"
+        "url": "https://www.lrr.sh"
     },
     "provider": {
         "@type": "Organization",
         "name": "Lexi's File Hosting",
-        "url": "https://www.0x800a6.dev"
+        "url": "https://www.lrr.sh"
     },
     "potentialAction": {
         "@type": "SearchAction",

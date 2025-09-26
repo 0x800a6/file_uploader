@@ -44,20 +44,26 @@ file_uploader/
 ### 2. CLI Client Setup
 
 1. Install dependencies (Ubuntu/Debian):
+
    ```bash
    sudo apt install build-essential libcurl4-openssl-dev
    ```
 
 2. Build the CLI client:
+
    ```bash
    cd cli/
    make clean && SEC_KEY='your_secret_key' API_URL='http://yourserver.com/upload.php' make
    ```
+
    Or let the Makefile prompt you for the key (uses default API URL):
+
    ```bash
    make
    ```
+
    Or build with custom API URL and interactive key prompt:
+
    ```bash
    API_URL='http://yourserver.com/upload.php' make
    ```
@@ -70,30 +76,37 @@ file_uploader/
 ### 3. Usage
 
 #### Web Interface
+
 Navigate to your server URL to browse and download files through the web interface.
 
 #### CLI Client
+
 Upload a single file:
+
 ```bash
 ./file_uploader myfile.txt
 ```
 
 Upload a file to a subdirectory:
+
 ```bash
 ./file_uploader myfile.txt "documents/important"
 ```
 
 Upload an entire directory:
+
 ```bash
 ./file_uploader /path/to/directory
 ```
 
 Verbose output:
+
 ```bash
 ./file_uploader -v myfile.txt
 ```
 
 Custom server URL (runtime override):
+
 ```bash
 ./file_uploader -u http://myserver.com/upload.php myfile.txt
 ```
@@ -105,6 +118,7 @@ Custom server URL (runtime override):
 ### Server Configuration
 
 Edit `web/config.php` to customize:
+
 - `SEC_KEY`: Secret key for authentication (set via setup script)
 - `max_file_size`: Maximum upload size in bytes (default: 100MB)
 - `upload_dir`: Directory where files are stored
@@ -114,6 +128,7 @@ Edit `web/config.php` to customize:
 The CLI client requires the secret key to be compiled in during build time. The default server URL can be set at build time using the `API_URL` parameter (defaults to `http://192.168.12.130/upload.php`) or changed at runtime using the `-u` flag.
 
 Build-time configuration:
+
 - `SEC_KEY`: Required authentication key
 - `API_URL`: Default server endpoint (optional)
 
@@ -128,11 +143,13 @@ Build-time configuration:
 ## Requirements
 
 ### Server
+
 - PHP 7.4 or higher
 - Apache/Nginx web server
 - Write permissions for the upload directory
 
 ### CLI Client
+
 - GCC compiler
 - libcurl development libraries
 - Linux/Unix environment
@@ -140,6 +157,7 @@ Build-time configuration:
 ## Development
 
 ### Building from Source
+
 ```bash
 cd cli/
 make check-deps  # Check for required dependencies
@@ -148,11 +166,13 @@ make test        # Run basic tests
 ```
 
 Build with custom configuration:
+
 ```bash
 make SEC_KEY=mykey API_URL=http://myserver.com/upload.php
 ```
 
 ### Makefile Targets
+
 - `all`: Build the file_uploader (default)
 - `debug`: Build with debug symbols
 - `install`: Install to `/usr/local/bin` (requires sudo)
@@ -162,6 +182,7 @@ make SEC_KEY=mykey API_URL=http://myserver.com/upload.php
 - `help`: Show available targets and build variables
 
 ### Build-time Variables
+
 - `SEC_KEY`: Server authentication key (required)
 - `API_URL`: Default API endpoint (optional, defaults to `http://192.168.12.130/upload.php`)
 
@@ -170,18 +191,22 @@ make SEC_KEY=mykey API_URL=http://myserver.com/upload.php
 ### Common Issues
 
 **CLI client build fails:**
+
 - Ensure libcurl development libraries are installed
 - Check that GCC and make are available
 
 **Upload fails with 401 error:**
+
 - Verify the secret key matches between server and client
 - Check that the key was properly set during compilation
 
 **Permission denied errors:**
+
 - Ensure web server has write access to the `files/` directory
 - Check file permissions: `chmod 755 files/`
 
 **File not found errors:**
+
 - Verify the server URL is correct
 - Check that upload.php is accessible
 - Ensure Apache mod_rewrite is enabled (if using .htaccess)
@@ -192,4 +217,4 @@ This project is open source. Feel free to modify and distribute as needed.
 
 ## Author
 
-Created by [Lexi](https://www.0x800a6.dev)
+Created by [Lexi](https://www.lrr.sh)
