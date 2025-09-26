@@ -150,8 +150,8 @@ TimeoutStartSec=300
 TimeoutStopSec=60
 Restart=on-failure
 RestartSec=10
-User=root
-Group=root
+User=$USER
+Group=$USER
 
 # Environment
 Environment=COMPOSE_PROJECT_NAME=$SERVICE_NAME
