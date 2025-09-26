@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  file-uploader:
+    build: .
+    container_name: file-uploader-web
+    ports:
+      - "8080:80"
+    volumes:
+      # Mount host files directory for persistent storage
+      - ./files:/var/www/html/files
+      # Mount config for easy editing
+      - ./web/config.php:/var/www/html/config.php
+    environment:
+      # Override default secret key (change this!)
+      - SEC_KEY=${SEC_KEY:-default_key_change_me}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Optional: Add a reverse proxy for production use
+  # nginx:
+  #   image: nginx:alpine
+  #   container_name: file-uploader-nginx
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./nginx.conf:/etc/nginx/nginx.conf:ro
+  #     - ./ssl:/etc/nginx/ssl:ro
+  #   depends_on:
+  #     - file-uploader
+  #   restart: unless-stopped
+
+volumes:
+  # Optional: Use named volumes instead of bind mounts
+  # file-data:
+  #   driver: local

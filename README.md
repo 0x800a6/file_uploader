@@ -19,18 +19,59 @@ file_uploader/
 ├── cli/                    # Command-line client
 │   ├── main.c             # Main CLI source code
 │   └── Makefile           # Build configuration
-└── web/                   # Web server files
-    ├── index.php          # File browser interface
-    ├── upload.php         # Upload endpoint
-    ├── download.php       # Download handler
-    ├── config.php         # Configuration file
-    ├── setup.sh           # Server setup script
-    └── .htaccess          # Apache configuration
+├── web/                   # Web server files
+│   ├── index.php          # File browser interface
+│   ├── upload.php         # Upload endpoint
+│   ├── download.php       # Download handler
+│   ├── config.php         # Configuration file
+│   ├── setup.sh           # Server setup script
+│   └── .htaccess          # Apache configuration
+├── files/                 # Host directory for uploaded files (created by Docker setup)
+├── Dockerfile             # Docker image configuration
+├── docker-compose.yml     # Docker Compose configuration
+├── docker-setup.sh        # Docker setup script
+├── .dockerignore          # Docker build context exclusions
+└── env.example            # Environment variables template
 ```
 
 ## Quick Start
 
-### 1. Server Setup
+### Option 1: Docker Setup (Recommended)
+
+The easiest way to get started is using Docker:
+
+1. **Prerequisites**: Install [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/)
+
+2. **Quick Setup**: Run the automated setup script:
+
+   ```bash
+   ./docker-setup.sh
+   ```
+
+   This will prompt you for a secret key and create all necessary configuration files.
+
+3. **Start the Server**:
+
+   ```bash
+   docker-compose up -d
+   ```
+
+4. **Access the Web Interface**: Open http://localhost:8080 in your browser
+
+5. **Build CLI Client** (optional):
+   ```bash
+   cd cli/
+   make clean && SEC_KEY='your_secret_key' make
+   ```
+
+**Docker Commands**:
+
+- `docker-compose up -d` - Start the server in background
+- `docker-compose down` - Stop the server
+- `docker-compose logs -f` - View server logs
+- `docker-compose restart` - Restart the server
+
+### Option 2: Manual Server Setup
 
 1. Copy the `web/` directory to your web server
 2. Run the setup script to configure your secret key:
@@ -41,7 +82,7 @@ file_uploader/
 3. Enter a secure secret key when prompted
 4. Ensure the web server has write permissions to the `files/` directory
 
-### 2. CLI Client Setup
+### CLI Client Setup
 
 1. Install dependencies (Ubuntu/Debian):
 
@@ -142,7 +183,12 @@ Build-time configuration:
 
 ## Requirements
 
-### Server
+### Docker Setup
+
+- Docker 20.10 or higher
+- Docker Compose 2.0 or higher
+
+### Manual Server Setup
 
 - PHP 7.4 or higher
 - Apache/Nginx web server
@@ -188,7 +234,26 @@ make SEC_KEY=mykey API_URL=http://myserver.com/upload.php
 
 ## Troubleshooting
 
-### Common Issues
+### Docker Issues
+
+**Container won't start:**
+
+- Check Docker is running: `docker --version`
+- View container logs: `docker-compose logs -f`
+- Ensure port 8080 is not in use: `netstat -tulpn | grep 8080`
+
+**Permission denied errors:**
+
+- Ensure the `files` directory exists and is writable
+- Check Docker volume mounts: `docker-compose config`
+- Verify directory permissions: `ls -la files/`
+
+**Secret key issues:**
+
+- Verify the secret key in `.env` file matches the one used for CLI builds
+- Check the config.php file in the container: `docker-compose exec file-uploader cat /var/www/html/config.php`
+
+### Manual Setup Issues
 
 **CLI client build fails:**
 
