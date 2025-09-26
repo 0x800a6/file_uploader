@@ -133,35 +133,17 @@ create_service() {
     # Create service file content
     cat > "/etc/systemd/system/$SERVICE_NAME.service" << EOF
 [Unit]
-Description=File Uploader (Docker Compose)
-Documentation=https://github.com/0x800a6/file-uploader
+Description=$SERVICE_NAME (Docker Compose)
 Requires=docker.service
-After=docker.service network-online.target
-Wants=network-online.target
+After=docker.service
 
 [Service]
-Type=simple
-RemainAfterExit=yes
+Type=exec
 WorkingDirectory=$WORKING_DIR
 ExecStart=/usr/bin/docker compose up
 ExecStop=/usr/bin/docker compose down
-ExecReload=/usr/bin/docker compose restart
-TimeoutStartSec=300
-TimeoutStopSec=60
-Restart=on-failure
-RestartSec=10
-User=$USER
-Group=$USER
-
-# Environment
-Environment=COMPOSE_PROJECT_NAME=$SERVICE_NAME
-
-# Security settings
-NoNewPrivileges=true
-PrivateTmp=true
-ProtectSystem=strict
-ProtectHome=true
-ReadWritePaths=$WORKING_DIR
+Restart=always
+TimeoutStartSec=0
 
 [Install]
 WantedBy=multi-user.target
