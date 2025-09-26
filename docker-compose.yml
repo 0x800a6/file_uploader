@@ -36,7 +36,7 @@ services:
   #     - file-uploader
   #   restart: unless-stopped
 
-volumes:
-  # Optional: Use named volumes instead of bind mounts
-  # file-data:
-  #   driver: local
+# Optional: Use named volumes instead of bind mounts
+# volumes:
+#   file-data:
+#     driver: local
