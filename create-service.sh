@@ -134,7 +134,7 @@ create_service() {
     cat > "/etc/systemd/system/$SERVICE_NAME.service" << EOF
 [Unit]
 Description=File Uploader (Docker Compose)
-Documentation=https://github.com/your-repo/file-uploader
+Documentation=https://github.com/0x800a6/file-uploader
 Requires=docker.service
 After=docker.service network-online.target
 Wants=network-online.target
@@ -143,9 +143,9 @@ Wants=network-online.target
 Type=simple
 RemainAfterExit=yes
 WorkingDirectory=$WORKING_DIR
-ExecStart=$docker_compose_cmd up
-ExecStop=$docker_compose_cmd down
-ExecReload=$docker_compose_cmd restart
+ExecStart=/usr/bin/docker compose up
+ExecStop=/usr/bin/docker compose down
+ExecReload=/usr/bin/docker compose restart
 TimeoutStartSec=300
 TimeoutStopSec=60
 Restart=on-failure
