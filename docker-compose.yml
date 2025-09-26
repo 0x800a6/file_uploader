@@ -11,9 +11,8 @@ services:
       - ./files:/var/www/html/files
       # Mount config for easy editing
       - ./web/config.php:/var/www/html/config.php
-    environment:
-      # Override default secret key (change this!)
-      - SEC_KEY=${SEC_KEY:-default_key_change_me}
+    env_file:
+      - .env
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/"]
