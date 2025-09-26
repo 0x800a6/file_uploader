@@ -88,10 +88,11 @@ find_docker_compose_path() {
     
     # Try docker-compose first (standalone)
     if command -v docker-compose &> /dev/null; then
-        path="docker-compose"
+        path=$(which docker-compose)
     # Try docker compose (plugin)
     elif docker compose version &> /dev/null; then
-        path="docker compose"
+        cmd=$(which docker)
+        path="$cmd compose"
     else
         log_error "Neither 'docker-compose' nor 'docker compose' found"
         log_info "Please install Docker Compose and try again"
