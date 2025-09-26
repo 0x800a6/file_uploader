@@ -152,6 +152,7 @@ function sanitizeFilename($filename)
 
 // Log the request
 logMessage('Upload request started - IP: ' . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+logMessage('Subdirectory parameter: "' . ($_POST['subdir'] ?? 'none') . '"');
 
 // Validate HTTP method
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -207,10 +208,23 @@ if (!empty($subdir)) {
 $realBaseDir = realpath($baseDir);
 $realTargetDir = realpath($targetDir);
 
-if ($realTargetDir === false || !str_starts_with($realTargetDir, $realBaseDir)) {
+// If target directory doesn't exist yet, check if the path would be safe
+if ($realTargetDir === false) {
+    // Check if the constructed path would be within the base directory
+    $normalizedTarget = $baseDir . '/' . $subdir;
+    $normalizedTarget = str_replace('\\', '/', $normalizedTarget);
+    $normalizedBase = str_replace('\\', '/', $realBaseDir);
+
+    if (!str_starts_with($normalizedTarget, $normalizedBase)) {
+        $targetDir = $baseDir;
+        $subdir = '';
+    }
+} elseif (!str_starts_with($realTargetDir, $realBaseDir)) {
     $targetDir = $baseDir;
     $subdir = '';
 }
+
+logMessage('Final subdirectory: "' . $subdir . '", target directory: "' . $targetDir . '"');
 
 // Ensure directory exists
 if (!file_exists($targetDir)) {
