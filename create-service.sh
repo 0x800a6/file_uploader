@@ -140,16 +140,18 @@ After=docker.service network-online.target
 Wants=network-online.target
 
 [Service]
-Type=oneshot
+Type=simple
 RemainAfterExit=yes
 WorkingDirectory=$WORKING_DIR
-ExecStart=$docker_compose_cmd up -d
+ExecStart=$docker_compose_cmd up
 ExecStop=$docker_compose_cmd down
 ExecReload=$docker_compose_cmd restart
 TimeoutStartSec=300
 TimeoutStopSec=60
 Restart=on-failure
 RestartSec=10
+User=root
+Group=root
 
 # Environment
 Environment=COMPOSE_PROJECT_NAME=$SERVICE_NAME
