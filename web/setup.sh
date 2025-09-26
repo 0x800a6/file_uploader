@@ -40,7 +40,7 @@ if [ ! -d "$FILES_DIR" ]; then
 fi
 
 # Set appropriate permissions
-chmod 755 "$FILES_DIR"
+chmod 777 "$FILES_DIR"
 chmod 644 "$CONFIG_FILE"
 
 echo ""
