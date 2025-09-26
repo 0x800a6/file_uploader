@@ -5,7 +5,7 @@ services:
     build: .
     container_name: file-uploader-web
     ports:
-      - "8080:80"
+      - "9000:80"
     volumes:
       # Mount host files directory for persistent storage
       - ./files:/var/www/html/files
@@ -21,22 +21,3 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-
-  # Optional: Add a reverse proxy for production use
-  # nginx:
-  #   image: nginx:alpine
-  #   container_name: file-uploader-nginx
-  #   ports:
-  #     - "80:80"
-  #     - "443:443"
-  #   volumes:
-  #     - ./nginx.conf:/etc/nginx/nginx.conf:ro
-  #     - ./ssl:/etc/nginx/ssl:ro
-  #   depends_on:
-  #     - file-uploader
-  #   restart: unless-stopped
-
-# Optional: Use named volumes instead of bind mounts
-# volumes:
-#   file-data:
-#     driver: local
