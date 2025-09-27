@@ -25,7 +25,8 @@ RUN rm -rf /var/www/html/files
 # Create a mount point for the host files directory
 RUN mkdir -p /var/www/html/files \
     && chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html
+    && chmod -R 755 /var/www/html \
+    && chmod -R 775 /var/www/html/files
 
 # Create a default config if none exists
 RUN if [ ! -f /var/www/html/config.php ]; then \
@@ -45,5 +46,9 @@ EXPOSE 80
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD curl -f http://localhost/ || exit 1
 
+# Copy and setup startup script
+COPY start.sh /usr/local/bin/start.sh
+RUN chmod +x /usr/local/bin/start.sh
+
 # Start Apache
-CMD ["apache2-foreground"]
+CMD ["/usr/local/bin/start.sh"]

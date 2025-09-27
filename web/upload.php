@@ -233,13 +233,30 @@ logMessage('Final subdirectory: "' . $subdir . '", target directory: "' . $targe
 
 // Ensure directory exists
 if (!file_exists($targetDir)) {
+    // Check if we can write to the parent directory
+    $parentDir = dirname($targetDir);
+    if (!is_writable($parentDir)) {
+        $response['message'] = 'Cannot create subdirectory: parent directory is not writable.';
+        $response['errors'][] = 'Parent directory not writable';
+        logMessage("Parent directory not writable: $parentDir", 'ERROR');
+        sendResponse($response, 500);
+    }
+
     if (!mkdir($targetDir, 0755, true)) {
         $response['message'] = 'Failed to create target directory.';
         $response['errors'][] = 'Directory creation failed';
-        logMessage("Failed to create directory: $targetDir", 'ERROR');
+        logMessage("Failed to create directory: $targetDir (parent: $parentDir)", 'ERROR');
         sendResponse($response, 500);
     }
     logMessage("Created directory: $targetDir");
+} else {
+    // Directory exists, check if it's writable
+    if (!is_writable($targetDir)) {
+        $response['message'] = 'Target directory exists but is not writable.';
+        $response['errors'][] = 'Directory not writable';
+        logMessage("Directory not writable: $targetDir", 'ERROR');
+        sendResponse($response, 500);
+    }
 }
 
 // Validate file upload
