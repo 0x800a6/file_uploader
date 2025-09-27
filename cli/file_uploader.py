@@ -939,13 +939,14 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s file.txt                    # Upload single file
-  %(prog)s -i                          # Interactive mode
-  %(prog)s -d /path/to/dir             # Upload directory
-  %(prog)s -p production file.txt      # Use production profile
-  %(prog)s --config-url http://...     # Override URL
-  %(prog)s --parallel 8                # Use 8 parallel uploads
-  %(prog)s --compress --encrypt        # Enable compression and encryption
+  %(prog)s file.txt                           # Upload single file
+  %(prog)s -i                                 # Interactive mode
+  %(prog)s -d /path/to/dir                    # Upload directory
+  %(prog)s -p production file.txt             # Use production profile
+  %(prog)s file.txt --subdir memes/developer  # Upload to specific subdirectory
+  %(prog)s --config-url http://...            # Override URL
+  %(prog)s --parallel 8                       # Use 8 parallel uploads
+  %(prog)s --compress --encrypt               # Enable compression and encryption
         """
     )
     
@@ -964,6 +965,7 @@ Examples:
     
     # Upload options
     parser.add_argument('--subdir', help='Target subdirectory on server')
+    parser.add_argument('--upload-path', dest='subdir', help='Target subdirectory on server (alias for --subdir)')
     parser.add_argument('--parallel', type=int, default=4, help='Number of parallel uploads')
     parser.add_argument('--chunk-size', type=int, default=8192, help='Chunk size for uploads')
     parser.add_argument('--timeout', type=int, default=30, help='Request timeout in seconds')
