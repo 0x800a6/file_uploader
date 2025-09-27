@@ -1,5 +1,10 @@
 <?php
-$baseDir = __DIR__ . '/files';
+// Load configuration
+$config = [];
+if (file_exists(__DIR__ . '/config.php')) {
+    $config = include __DIR__ . '/config.php';
+}
+$baseDir = $config['upload_dir'] ?? __DIR__ . '/files';
 
 // Get the requested path from URL
 $requestPath = $_SERVER['REQUEST_URI'];

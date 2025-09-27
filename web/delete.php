@@ -29,7 +29,6 @@ $response = [
 ];
 
 // Configuration
-$baseDir = __DIR__ . '/files';
 $logFile = __DIR__ . '/logs/delete.log';
 
 // Ensure logs directory exists
@@ -103,6 +102,9 @@ if (file_exists(__DIR__ . '/config.php')) {
     logMessage('Configuration file not found', 'ERROR');
     sendResponse($response, 500);
 }
+
+// Set base directory from config
+$baseDir = $config['upload_dir'] ?? __DIR__ . '/files';
 
 // Validate security key
 $requiredKey = $config['SEC_KEY'] ?? null;
