@@ -199,8 +199,12 @@ if ($providedKey !== $requiredKey) {
 // Validate and sanitize subdirectory
 $subdir = $_POST['subdir'] ?? '';
 $subdir = str_replace(['..', './', '\\', '../', '..\\'], '', $subdir);  // Prevent path traversal
-$subdir = preg_replace('/[^a-zA-Z0-9._-]/', '_', $subdir);  // Only allow safe characters
+$subdir = preg_replace('/[^a-zA-Z0-9._\-\/]/', '_', $subdir);  // Allow safe characters including forward slashes
 $subdir = trim($subdir, '/._-');  // Remove leading/trailing unsafe characters
+
+// Additional security: ensure no consecutive slashes or dots
+$subdir = preg_replace('/\/+/', '/', $subdir);  // Replace multiple slashes with single slash
+$subdir = preg_replace('/\.{2,}/', '', $subdir);  // Remove multiple consecutive dots
 
 // Build target directory path
 if (!empty($subdir)) {
