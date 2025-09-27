@@ -656,26 +656,6 @@ $description = empty($currentPath)
     color: white;
 }
 
-.delete-btn {
-    padding: 2px 6px;
-    border: 1px solid #ff0000;
-    background: white;
-    color: #ff0000;
-    font-family: "Courier New", Courier, monospace;
-    font-size: 10px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.delete-btn:hover {
-    background: #ff0000;
-    color: white;
-}
-
-.delete-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
 
 .file-info {
     font-size: 0.8em;
@@ -1080,7 +1060,7 @@ $description = empty($currentPath)
             <th scope="col"><a href="<?= buildUrl(['sort' => 'size']) ?>">Size</a></th>
             <th scope="col"><a href="<?= buildUrl(['sort' => 'date']) ?>">Last Modified</a></th>
             <th scope="col">SHA-256</th>
-            <th scope="col">Actions</th>
+            <th scope="col">Download</th>
         </tr>
         </thead>
         <tbody>
@@ -1118,15 +1098,11 @@ $description = empty($currentPath)
                 <td>
                     <?php if (!$file['isDir']): ?>
                         <button onclick="downloadSingleFile('<?= htmlspecialchars($file['name']) ?>')" 
-                                class="action-btn primary" style="padding: 2px 6px; font-size: 10px; margin-right: 5px;" 
+                                class="action-btn primary" style="padding: 2px 6px; font-size: 10px;" 
                                 title="Download file">
                             [DL]
                         </button>
                     <?php endif; ?>
-                    <button onclick="deleteFile('<?= htmlspecialchars($file['name']) ?>', <?= $file['isDir'] ? 'true' : 'false' ?>)" 
-                            class="delete-btn" title="Delete <?= $file['isDir'] ? 'directory' : 'file' ?>">
-                        [DEL]
-                    </button>
                 </td>
             </tr>
         <?php endforeach; ?>
@@ -1144,9 +1120,6 @@ $description = empty($currentPath)
                                     class="action-btn primary" style="font-size: 10px; padding: 2px 4px;" 
                                     title="Download file">[DL]</button>
                         <?php endif; ?>
-                        <button onclick="deleteFile('<?= htmlspecialchars($file['name']) ?>', <?= $file['isDir'] ? 'true' : 'false' ?>)" 
-                                class="delete-btn" style="font-size: 10px; padding: 2px 4px;" 
-                                title="Delete <?= $file['isDir'] ? 'directory' : 'file' ?>">[DEL]</button>
                     </div>
                     <?php
                     $relativePath = trim(str_replace($baseDir, '', $file['path']), '/');
@@ -1191,9 +1164,6 @@ $description = empty($currentPath)
                                     class="action-btn primary" style="font-size: 10px; padding: 2px 6px;" 
                                     title="Download file">[DL]</button>
                         <?php endif; ?>
-                        <button onclick="deleteFile('<?= htmlspecialchars($file['name']) ?>', <?= $file['isDir'] ? 'true' : 'false' ?>)" 
-                                class="delete-btn" style="font-size: 10px; padding: 2px 6px;" 
-                                title="Delete <?= $file['isDir'] ? 'directory' : 'file' ?>">[DEL]</button>
                     </div>
                 </div>
             <?php endforeach; ?>
@@ -1904,43 +1874,6 @@ function cancelUpload() {
     showNotification('Upload cancelled', 'warning');
 }
 
-// Delete file functionality
-function deleteFile(filename, isDir) {
-    const uploadKey = prompt(`Enter security key to delete ${isDir ? 'directory' : 'file'}: "${filename}"`);
-    
-    if (!uploadKey) {
-        return;
-    }
-    
-    if (!confirm(`Are you sure you want to delete "${filename}"? This action cannot be undone.`)) {
-        return;
-    }
-    
-    showNotification(`Deleting ${isDir ? 'directory' : 'file'}...`, 'info');
-    
-    const formData = new FormData();
-    formData.append('action', 'delete');
-    formData.append('filename', filename);
-    formData.append('key', uploadKey);
-    formData.append('is_dir', isDir ? '1' : '0');
-    
-    fetch('delete.php', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showNotification(`Successfully deleted "${filename}"`, 'success');
-            setTimeout(() => refreshPage(), 1000);
-        } else {
-            showNotification(`Failed to delete "${filename}": ${data.message}`, 'error');
-        }
-    })
-    .catch(error => {
-        showNotification(`Error deleting "${filename}": ${error.message}`, 'error');
-    });
-}
 
 // Keyboard shortcuts
 document.addEventListener('keydown', function(e) {
